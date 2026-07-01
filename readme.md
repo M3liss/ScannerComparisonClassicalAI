@@ -9,37 +9,36 @@ for vulnerabilities (via SAST and LLM-based analysis), and analyzing the resulti
 
 ## Data Availability
 
-The F-Droid app data (`fdroid.tar`, `fdroid_obfuscated.tar`) and the scan results
-(`results/`) are **not stored in this git repository** — they're archived on Zenodo, which
-provides a permanent, citable DOI, rather than committed directly (GitHub isn't well suited
-to hosting multi-GB binary archives).
+We provide the anonymized results of the 100 manually validated apps inside this repository under `results`. For safety, we do not enclose the true repositories names, but include a mapping file of the true names used in this study.
 
-**Zenodo record:** 10.5281/zenodo.21098827
+- `100_results/` — the 100 anonymized apps: source code, obfuscated source code,
+  and scan results, with real app names replaced by anonymized IDs (`app_001`, ...)
+  to protect the identity of apps with confirmed vulnerabilities
+- `validation.csv` — ground-truth vulnerability labels: a manual reviewer's verdict
+  (confirmed / false positive) on each scanner finding
+- `normal_file_names.csv` — maps each anonymized ID back to its real F-Droid
+  package name
 
-To download everything into place, run:
-
-```bash
-./fetch_data.sh          # fetches all archives (apps + obfuscated + results)
-./fetch_data.sh apps     # or fetch just one: apps | obfuscated | results
-```
-
-This downloads and verifies (via checksum) `fdroid.tar`, `fdroid_obfuscated.tar`, and
-the `results/` archives from the Zenodo record above. See the comments at the top of
-`fetch_data.sh` for how to point it at the record.
+See `results/README.md` for the full anonymization scheme and how to de-anonymize
+when needed.
 
 ## Directory Overview
 
 ```
 .
 ├── clone_fdroid.sh          # Script to clone the F-Droid repo(s)
-├── fetch_data.sh            # Downloads fdroid.tar.gz, fdroid_obfuscated.tar.gz, and
-│                             # results/ from Zenodo (see Data Availability above)
-├── fdroid.tar            # F-Droid repo data, split/tarred to save disk space
+├── fetch_data.sh            # Downloads fdroid.tar, fdroid_obfuscated.tar, and
+│                             # results/{sast,llm}/ from Zenodo (see Data Availability above)
+├── fdroid.tar                # F-Droid repo data, split/tarred to save disk space
 │                             # (fetched via fetch_data.sh — not committed to git)
-├── fdroid_obfuscated.tar # F-Droid obfuscated
+├── fdroid_obfuscated.tar     # F-Droid obfuscated
 │                             # (fetched via fetch_data.sh — not committed to git)
 │
-├── results/                 # Raw scan output (fetched via fetch_data.sh — not committed to git)
+├── results/
+│   └── validation/           # committed directly to git (anonymized, no Zenodo)
+│       ├── 100_results/
+│   ├── validation.csv
+│   ├── normal_file_names.csv
 │
 └── analysis/                # Post-processing & analysis of results/
 ```
@@ -64,10 +63,11 @@ from Zenodo.
 
 Contains the output of running vulnerability scans against the cloned apps:
 
-- **SAST results** — findings from static analysis tooling.
-- **LLM results** — findings from LLM-based vulnerability review.
+- **SAST results** (`results/sast/`) — findings from static analysis tooling, fetched via `fetch_data.sh`.
+- **LLM results** (`results/llm/`) — findings from LLM-based vulnerability review, fetched via `fetch_data.sh`.
+- **Validation subset** (`results/validation/`) — anonymized 100-app subset used to
+  validate scanner findings, committed directly to this repo (no Zenodo).
 
-Both are stored as tar archives (again, to save space) and fetched via `fetch_data.sh`.
 See `results/README.md` for how each subfolder is organized and how to extract/read
 the archives.
 
@@ -79,9 +79,10 @@ what scripts are available and how to run them.
 
 ## Getting Started
 
-1. Run `./fetch_data.sh` to pull the app data and results from Zenodo (or run the
-   clone script yourself to regenerate `fdroid.tar.gz` / `fdroid_obfuscated.tar.gz`
-   from scratch).
+1. Run `./fetch_data.sh` to pull the app data and full results from Zenodo (or run
+   the clone script yourself to regenerate `fdroid.tar` / `fdroid_obfuscated.tar`
+   from scratch). The validation subset in `results/validation/` is already in the
+   repo — no fetch needed.
 2. Extract the relevant tarballs under `results/` for the scan type you're interested in.
 3. Head into `analysis/` to run the analysis scripts against those results.
 
