@@ -12,7 +12,7 @@ validation/
 │                             # and scan results, one set per anonymized app ID
 ├── validation.csv           # ground-truth vulnerability labels: a manual reviewer's
 │                             # verdict on each scanner finding (confirmed / false positive)
-└── normal_file_names.csv    # maps each anonymized app ID to its real F-Droid package name
+└── normal_file_names.csv    # returns the real app names that were used in the validation of findings
 ```
 
 ### Anonymization
